@@ -430,6 +430,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\MyLookAndFeel.cpp">
+      <Filter>DrEcho\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\MyLogger.cpp">
       <Filter>DrEcho\Source</Filter>
     </ClCompile>
@@ -2493,6 +2496,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\MyLookAndFeel.h">
+      <Filter>DrEcho\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MyLogger.h">
       <Filter>DrEcho\Source</Filter>
     </ClInclude>

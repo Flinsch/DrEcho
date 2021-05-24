@@ -2,12 +2,15 @@
 
 <JUCERPROJECT id="RnXuyf" name="DrEcho" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              version="1.0.0" pluginFormats="buildStandalone,buildVST3" pluginManufacturer="Flinsch"
+              version="1.0.0" pluginFormats="buildStandalone,buildVST3" pluginManufacturer="Stefan Fleischer"
               aaxIdentifier="com.Flinsch.DrEcho" pluginVST3Category="Delay"
-              pluginVSTCategory="kPlugCategEffect" pluginChannelConfigs="{1, 1}, {2, 2}"
-              bundleIdentifier="com.Flinsch.DrEcho" pluginName="Dr.Echo" pluginDesc="A simple echo/delay VST plug-in">
+              pluginVSTCategory="kPlugCategEffect" bundleIdentifier="com.Flinsch.DrEcho"
+              pluginName="Dr.Echo" pluginDesc="A simple echo/delay VST plug-in">
   <MAINGROUP id="gF59Lq" name="DrEcho">
     <GROUP id="{5D972A76-B4D2-5B9F-F867-09CCC888B24B}" name="Source">
+      <FILE id="WRAen5" name="MyLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/MyLookAndFeel.cpp"/>
+      <FILE id="XCSxAK" name="MyLookAndFeel.h" compile="0" resource="0" file="Source/MyLookAndFeel.h"/>
       <FILE id="JMRqgC" name="MyLogger.cpp" compile="1" resource="0" file="Source/MyLogger.cpp"/>
       <FILE id="IhuBuS" name="MyLogger.h" compile="0" resource="0" file="Source/MyLogger.h"/>
       <FILE id="oN9IQK" name="ComponentAttachmentWrapper.h" compile="0" resource="0"

@@ -23,11 +23,17 @@ DrEchoAudioProcessor::DrEchoAudioProcessor()
                      #endif
                        )
 #endif
-    : apvts(*this, nullptr, "PARAMETERS", {
-        std::make_unique<juce::AudioParameterInt>(      "dry",      "Dry",      0,      100,    100,    "Dry" ),
-        std::make_unique<juce::AudioParameterFloat>(    "delay",    "Delay",    juce::NormalisableRange<float>{ 0.0f, 1.0f, 0.01f },  0.23077f,   "Delay" ),
-        std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "Feedback" ),
-        std::make_unique<juce::AudioParameterInt>(      "wet",      "Wet",      0,      100,    50,     "Wet" ),
+    , apvts(*this, nullptr, "PARAMETERS", {
+        std::make_unique<juce::AudioParameterInt>(      "level",    "Level",    0,      200,    100,    "LEVEL" ),
+        std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK" ),
+
+        std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    0,      999,    214,    "DELAY" ),
+
+        std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping Pong",0,      100,    50,     "PING PONG" ),
+        std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ),
+
+        std::make_unique<juce::AudioParameterInt>(      "dry",      "Dry",      0,      100,    100,    "DRY" ),
+        std::make_unique<juce::AudioParameterInt>(      "wet",      "Wet",      0,      100,    50,     "WET" ),
     })
 {
 }
@@ -154,11 +160,18 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     jassert( totalNumInputChannels == totalNumOutputChannels );
+    jassert( totalNumInputChannels == 2 );
 
-    const float dry = apvts.getRawParameterValue("dry")->load() * 0.01f;
-    const float delay = apvts.getRawParameterValue("delay")->load();
-    const float feedback = apvts.getRawParameterValue("feedback")->load() * 0.01f;
-    const float wet = apvts.getRawParameterValue("wet")->load() * 0.01f;
+    const float level = apvts.getRawParameterValue("level")->load() * 0.01f; // integer percentage to float
+    const float bank = apvts.getRawParameterValue("bank")->load() / 45.0f; // integer [-45; +45] to float [-1; +1]
+
+    const float delay = apvts.getRawParameterValue("delay")->load() * 0.001f; // integer milliseconds to float seconds
+
+    const float pingpong = apvts.getRawParameterValue("pingpong")->load() * 0.01f; // integer percentage to float
+    const float feedback = apvts.getRawParameterValue("feedback")->load() * 0.01f; // integer percentage to float
+
+    const float dry = apvts.getRawParameterValue("dry")->load() * 0.01f; // integer percentage to float
+    const float wet = apvts.getRawParameterValue("wet")->load() * 0.01f; // integer percentage to float
 
     const size_t num_delayed_samples = static_cast<size_t>( _sample_rate * delay );
 
@@ -177,29 +190,57 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    struct SampleInfo
+    {
+        float dry_sample;
+        float input_sample;
+        float delayed_sample;
+        float wet_sample;
+    } channel_sample_info[2];
+
     for ( int block_index = 0; block_index < buffer.getNumSamples(); ++block_index )
     {
+        const auto current_index = _buffer_index;
+        const auto delayed_index = (_buffer_index + _buffer_size - num_delayed_samples) % _buffer_size;
+        
         for ( int channel = 0; channel < totalNumInputChannels; ++channel )
         {
-            const float* in_ptr = buffer.getReadPointer( channel ) + block_index;
-            float* out_ptr = buffer.getWritePointer( channel ) + block_index;
+            SampleInfo& si = channel_sample_info[ channel ];
+            si.dry_sample = buffer.getReadPointer( channel )[ block_index ];
+        } // for channel
 
-            const float dry_sample = *in_ptr;
-
-            const auto current_index = _buffer_index;
-            const auto delayed_index = (_buffer_index + _buffer_size - num_delayed_samples) % _buffer_size;
-
-            const float delayed_sample = _sample_buffers[ channel ][ delayed_index ];
-
-            float wet_sample = delayed_sample;
-
-            _sample_buffers[ channel ][ current_index ] = dry_sample + feedback * wet_sample;
-
-            *out_ptr = dry * dry_sample + wet * wet_sample;
+        SampleInfo& si0 = channel_sample_info[ 0 ];
+        SampleInfo& si1 = channel_sample_info[ 1 ];
+        if ( totalNumInputChannels == 2 )
+        {
+            const float M = 0.5f * (si0.dry_sample + si1.dry_sample);
+            const float S = si0.dry_sample - si1.dry_sample;
+            si0.input_sample = ::cosf( 0.25f * juce::float_Pi * (1.0f + bank) ) * M + S;
+            si1.input_sample = ::cosf( 0.25f * juce::float_Pi * (1.0f - bank) ) * M - S;
+        }
+        else
+        {
+            si0.input_sample = si0.dry_sample;
         }
 
+        for ( int channel = 0; channel < totalNumInputChannels; ++channel )
+        {
+            SampleInfo& si = channel_sample_info[ channel ];
+
+            si.input_sample *= level;
+
+            const int other_channel = totalNumInputChannels - 1 - channel;
+            si.delayed_sample = (1.0f - pingpong) * _sample_buffers[ channel ][ delayed_index ] + pingpong * _sample_buffers[ other_channel ][ delayed_index ];
+
+            si.wet_sample = si.delayed_sample;
+
+            _sample_buffers[ channel ][ current_index ] = si.input_sample + feedback * si.wet_sample;
+
+            buffer.getWritePointer( channel )[ block_index ] = dry * si.dry_sample + wet * si.wet_sample;
+        } // for channel
+
         _buffer_index = (_buffer_index + 1) % _buffer_size;
-    }
+    } // for sample
 }
 
 //==============================================================================
