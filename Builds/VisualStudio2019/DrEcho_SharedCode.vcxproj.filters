@@ -430,7 +430,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\MyLookAndFeel.cpp">
+    <ClCompile Include="..\..\Source\MetaLookAndFeel.cpp">
+      <Filter>DrEcho\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\DefaultLookAndFeel.cpp">
       <Filter>DrEcho\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\MyLogger.cpp">
@@ -2496,7 +2499,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\MyLookAndFeel.h">
+    <ClInclude Include="..\..\Source\MetaLookAndFeel.h">
+      <Filter>DrEcho\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\DefaultLookAndFeel.h">
       <Filter>DrEcho\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MyLogger.h">

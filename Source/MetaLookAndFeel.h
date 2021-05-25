@@ -1,9 +1,9 @@
 /*
   ==============================================================================
 
-    MyLookAndFeel.h
-    Created: 21 May 2021 7:25:27pm
-    Author:  Stefan
+    MetaLookAndFeel.h
+    Created: 25 May 2021 10:57:50am
+    Author:  sflei_01
 
   ==============================================================================
 */
@@ -12,8 +12,12 @@
 
 #include <JuceHeader.h>
 
-class MyLookAndFeel : public juce::LookAndFeel_V4
+#include "DefaultLookAndFeel.h"
+
+class MetaLookAndFeel : public DefaultLookAndFeel
 {
+
 public:
-    virtual juce::Slider::SliderLayout getSliderLayout(juce::Slider& slider) override;
+    MetaLookAndFeel();
+
 };

@@ -28,7 +28,7 @@ DrEchoAudioProcessorEditor::DrEchoAudioProcessorEditor (DrEchoAudioProcessor& p)
     const int oy = (ch - sh) / 2 + ch / 2;
 
     _add_slider( "level",       { ox + cw * 0,      oy + ch * 0,      sw, sh }, " %", true );
-    _add_slider( "bank",        { ox + cw * 0,      oy + ch * 1,      sw, sh }, " °", true );
+    _add_slider( "bank",        { ox + cw * 0,      oy + ch * 1,      sw, sh }, L" °", true );
 
     _add_slider( "delay",       { ox + cw * 3/2-20, oy + ch * 0-20,   sw+40, sh+40 }, " ms" );
 
@@ -78,7 +78,7 @@ void DrEchoAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRect( 0 * cw, 0, 1 * cw, H );
     g.setFillType( juce::FillType( juce::Colour( 0xffefefef ) ) );
     g.fillRect( 1 * cw, 0, 2 * cw, H );
-    g.setFillType( juce::FillType( juce::Colour( 0xff0f2f3f ) ) );
+    g.setFillType( juce::FillType( juce::Colour( 0xff0b2430 ) ) );
     g.fillRect( 3 * cw, 0, 3 * cw, H );
 
     g.setFont( juce::Font( "Arial", 24.0f, juce::Font::bold ) );
@@ -89,41 +89,43 @@ void DrEchoAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour( juce::Colour( 0x7fffffff ) );
     g.drawFittedText( "OUTPUT MIX", cw * 3 + 4, 4, cw - 8, 28, juce::Justification::centredTop, 1 );
 
-    {
-        juce::Font logo_font = juce::Font( "Arial", 32.0f, juce::Font::bold );
-        static int Dr = logo_font.getStringWidth( "Dr" );
-        static int _ = logo_font.getStringWidth( "." );
-        static int Echo = logo_font.getStringWidth( "Echo" );
-        static int Dr_Echo = Dr + _ / 2 + Echo;
+    const juce::Font logo_font = juce::Font( "Arial", 32.0f, juce::Font::bold );
+    const juce::Font italic_font = juce::Font( "Arial", 14.0f, juce::Font::italic );
+    const juce::Font bold_font = juce::Font( "Arial", 14.0f, juce::Font::bold );
 
-        g.setFont( logo_font );
-        g.setColour( juce::Colour( 0x7fffffff ) );
-        g.drawSingleLineText( "Dr", 4, H - 6 );
-        g.setColour( juce::Colour( 0x3fffffff ) );
-        g.drawSingleLineText( ".", 4 + Dr - _ / 2, H - 6 );
-        g.setColour( juce::Colour( 0xefffffff ) );
-        g.drawSingleLineText( "Echo", 4 + Dr + _ / 2, H - 6 );
-    }
+    const juce::StringRef logo_Dr( "Dr" );
+    const juce::StringRef logo_dot( "." );
+    const juce::StringRef logo_Echo( "Echo" );
+    static const int w_Dr = logo_font.getStringWidth( logo_Dr );
+    static const int w_dot = logo_font.getStringWidth( logo_dot );
+    static const int w_Echo = logo_font.getStringWidth( logo_Echo );
+    static const int w_Dr_Echo = w_Dr + w_dot / 2 + w_Echo;
 
-    {
-        juce::Font italic_font = juce::Font( "Arial", 14.0f, juce::Font::italic );
-        juce::Font bold_font = juce::Font( "Arial", 14.0f, juce::Font::bold );
-        static int Stefan_Fleischer = bold_font.getStringWidth( "Stefan Fleischer" );
+    g.setFont( logo_font );
+    g.setColour( juce::Colour( 0x7fffffff ) );
+    g.drawSingleLineText( logo_Dr, 4, H - 6 );
+    g.setColour( juce::Colour( 0x3fffffff ) );
+    g.drawSingleLineText( logo_dot, 4 + w_Dr - w_dot / 2, H - 6 );
+    g.setColour( juce::Colour( 0xefffffff ) );
+    g.drawSingleLineText( logo_Echo, 4 + w_Dr + w_dot / 2, H - 6 );
 
-        g.setFont( italic_font );
-        g.setColour( juce::Colour( 0x3fffffff ) );
-        g.drawFittedText( "A plug-in by", W - Stefan_Fleischer - 4, H - 12 - 12 - 4, Stefan_Fleischer, 12, juce::Justification::bottomLeft, 1 );
-        g.setFont( bold_font );
-        g.setColour( juce::Colour( 0x7fffffff ) );
-        g.drawFittedText( "Stefan Fleischer", W - Stefan_Fleischer - 4, H - 12 - 2, Stefan_Fleischer, 12, juce::Justification::bottomRight, 1 );
+    const juce::StringRef author_name( JucePlugin_Manufacturer );
+    const juce::StringRef version( JucePlugin_VersionString );
+    static const int w_author_name = bold_font.getStringWidth( author_name );
 
-        g.setFont( italic_font );
-        g.setColour( juce::Colour( 0x3f000000 ) );
-        g.drawFittedText( "Version", cw, H - 10 - 10 - 4, cw * 2, 10, juce::Justification::centredBottom, 1 );
-        g.setFont( bold_font );
-        g.setColour( juce::Colour( 0x7f000000 ) );
-        g.drawFittedText( "1.0.0", cw, H - 10 - 2, cw * 2, 10, juce::Justification::centredBottom, 1 );
-    }
+    g.setFont( italic_font );
+    g.setColour( juce::Colour( 0x3fffffff ) );
+    g.drawFittedText( "A plug-in by", W - w_author_name - 4, H - 12 - 12 - 4, w_author_name, 12, juce::Justification::bottomLeft, 1 );
+    g.setFont( bold_font );
+    g.setColour( juce::Colour( 0x7fffffff ) );
+    g.drawFittedText( author_name, W - w_author_name - 4, H - 12 - 2, w_author_name, 12, juce::Justification::bottomRight, 1 );
+
+    g.setFont( italic_font );
+    g.setColour( juce::Colour( 0x3f000000 ) );
+    g.drawFittedText( "Version", cw, H - 10 - 10 - 4, cw * 2, 10, juce::Justification::centredBottom, 1 );
+    g.setFont( bold_font );
+    g.setColour( juce::Colour( 0x7f000000 ) );
+    g.drawFittedText( version, cw, H - 10 - 2, cw * 2, 10, juce::Justification::centredBottom, 1 );
 
     /*for ( auto& p : _component_infos )
     {
@@ -162,7 +164,7 @@ juce::Label& DrEchoAudioProcessorEditor::_add_label(const juce::String& text, co
 
     juce::Label& label = *dynamic_cast<juce::Label*>( ci.component_ptr.get() );
 
-    label.setLookAndFeel( &_look_and_feel );
+    label.setLookAndFeel( meta ? &_meta_look_and_feel : &_default_look_and_feel );
 
     label.setText( text, juce::NotificationType::dontSendNotification );
     label.setJustificationType( juce::Justification::centred );
@@ -170,9 +172,6 @@ juce::Label& DrEchoAudioProcessorEditor::_add_label(const juce::String& text, co
     juce::Font font = label.getFont();
     font.setBold( true );
     label.setFont( font );
-
-    label.setColour( juce::Label::backgroundColourId, juce::Colours::transparentBlack );
-    label.setColour( juce::Label::textColourId, juce::Colour( meta ? 0xff878787 : 0xff888888 ) );
 
     addAndMakeVisible( label );
 
@@ -190,7 +189,7 @@ juce::Slider& DrEchoAudioProcessorEditor::_add_slider(const juce::String& parame
     juce::Slider& slider = *dynamic_cast<juce::Slider*>( ci.component_ptr.get() );
     ci.component_attachment_wrapper_ptr.reset( _create_component_attachment_wrapper<juce::AudioProcessorValueTreeState::SliderAttachment>( parameterID, slider ) );
 
-    slider.setLookAndFeel( &_look_and_feel );
+    slider.setLookAndFeel( meta ? &_meta_look_and_feel : &_default_look_and_feel );
 
     int text_box_height = slider.getTextBoxHeight() * 2 / 3;
 
@@ -201,15 +200,7 @@ juce::Slider& DrEchoAudioProcessorEditor::_add_slider(const juce::String& parame
     slider.setTextBoxStyle( juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, bounds.getWidth(), slider.getTextBoxHeight() );
     slider.setTextValueSuffix( textValueSuffix );
 
-    //slider.setColour( juce::Slider::backgroundColourId, juce::Colours::red );
-    slider.setColour( juce::Slider::thumbColourId, meta ? juce::Colours::white : juce::Colours::black );
-    //slider.setColour( juce::Slider::trackColourId, juce::Colours::red );
-    slider.setColour( juce::Slider::rotarySliderFillColourId, juce::Colour( meta ? 0xffd7d7d7 : 0xff383838 ) );
-    slider.setColour( juce::Slider::rotarySliderOutlineColourId, juce::Colour( meta ? 0xff383838 : 0xffd7d7d7 ) );
-    slider.setColour( juce::Slider::textBoxTextColourId, juce::Colour( meta ? 0xffd7d7d7 : 0xff383838 ) );
-    slider.setColour( juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack );
-    //slider.setColour( juce::Slider::textBoxHighlightColourId, juce::Colours::red );
-    slider.setColour( juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack );
+    slider.setPopupMenuEnabled( true );
 
     addAndMakeVisible( slider );
 

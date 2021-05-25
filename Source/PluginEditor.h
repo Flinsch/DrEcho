@@ -12,7 +12,8 @@
 #include "PluginProcessor.h"
 
 #include "ComponentAttachmentWrapper.h"
-#include "MyLookAndFeel.h"
+#include "DefaultLookAndFeel.h"
+#include "MetaLookAndFeel.h"
 
 //==============================================================================
 /**
@@ -44,7 +45,8 @@ private:
 
     juce::ComponentBoundsConstrainer constrainer;
 
-    MyLookAndFeel _look_and_feel;
+    DefaultLookAndFeel _default_look_and_feel;
+    MetaLookAndFeel _meta_look_and_feel;
 
 private:
     juce::Label& _add_label(const juce::String& text, const juce::Rectangle<int>& bounds, bool meta = false);

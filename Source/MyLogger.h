@@ -15,6 +15,7 @@
 class MyLogger
     : public juce::Logger
 {
+
 private:
     MyLogger();
 
@@ -35,4 +36,5 @@ public:
 
 public:
     virtual void logMessage(const juce::String& message) override;
+
 };

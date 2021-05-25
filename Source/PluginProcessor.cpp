@@ -25,9 +25,9 @@ DrEchoAudioProcessor::DrEchoAudioProcessor()
 #endif
     , apvts(*this, nullptr, "PARAMETERS", {
         std::make_unique<juce::AudioParameterInt>(      "level",    "Level",    0,      200,    100,    "LEVEL" ),
-        std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK" ),
+        std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK", [](int value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+d", value) : "0"; } ),
 
-        std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    0,      999,    214,    "DELAY" ),
+        std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    1,      999,    214,    "DELAY" ),
 
         std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping Pong",0,      100,    50,     "PING PONG" ),
         std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ),
@@ -194,7 +194,6 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     {
         float dry_sample;
         float input_sample;
-        float delayed_sample;
         float wet_sample;
     } channel_sample_info[2];
 
@@ -226,17 +225,17 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         for ( int channel = 0; channel < totalNumInputChannels; ++channel )
         {
             SampleInfo& si = channel_sample_info[ channel ];
-
             si.input_sample *= level;
-
-            const int other_channel = totalNumInputChannels - 1 - channel;
-            si.delayed_sample = (1.0f - pingpong) * _sample_buffers[ channel ][ delayed_index ] + pingpong * _sample_buffers[ other_channel ][ delayed_index ];
-
-            si.wet_sample = si.delayed_sample;
-
-            _sample_buffers[ channel ][ current_index ] = si.input_sample + feedback * si.wet_sample;
-
+            si.wet_sample = _sample_buffers[ channel ][ delayed_index ];
             buffer.getWritePointer( channel )[ block_index ] = dry * si.dry_sample + wet * si.wet_sample;
+        } // for channel
+
+        for ( int channel = 0; channel < totalNumInputChannels; ++channel )
+        {
+            const int other_channel = totalNumInputChannels - 1 - channel;
+            SampleInfo& si = channel_sample_info[ channel ];
+            SampleInfo& si2 = channel_sample_info[ other_channel ];
+            _sample_buffers[ channel ][ current_index ] = si.input_sample + feedback * juce::jmap( pingpong, si.wet_sample, si2.wet_sample );
         } // for channel
 
         _buffer_index = (_buffer_index + 1) % _buffer_size;
