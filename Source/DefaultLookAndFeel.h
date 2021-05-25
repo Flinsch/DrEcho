@@ -21,4 +21,6 @@ public:
 public:
     virtual juce::Slider::SliderLayout getSliderLayout(juce::Slider& slider) override;
 
+    virtual void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, const float rotaryStartAngle, const float rotaryEndAngle, juce::Slider& slider) override;
+
 };

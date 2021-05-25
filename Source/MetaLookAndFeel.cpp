@@ -17,9 +17,9 @@ MetaLookAndFeel::MetaLookAndFeel()
     setColour( juce::Label::textColourId, juce::Colour( 0xff878787 ) );
 
     //setColour( juce::Slider::backgroundColourId, juce::Colours::red );
-    setColour( juce::Slider::thumbColourId, juce::Colours::white );
-    //setColour( juce::Slider::trackColourId, juce::Colours::red );
-    setColour( juce::Slider::rotarySliderFillColourId, juce::Colour(0xffd7d7d7 ) );
+    setColour( juce::Slider::thumbColourId, juce::Colour( 0xffd7d7d7 ) );
+    setColour( juce::Slider::trackColourId, juce::Colours::black );
+    setColour( juce::Slider::rotarySliderFillColourId, juce::Colours::white );
     setColour( juce::Slider::rotarySliderOutlineColourId, juce::Colour( 0xff383838 ) );
     setColour( juce::Slider::textBoxTextColourId, juce::Colour( 0xffd7d7d7 ) );
     setColour( juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack );

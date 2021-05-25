@@ -11,6 +11,30 @@
 
 #include "MyLogger.h"
 
+juce::AudioProcessorValueTreeState::ParameterLayout _create_parameter_layout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout params;
+
+    juce::NormalisableRange<float> gain_range( -12.0f, +12.0f, 0.1f );
+
+    params.add( std::make_unique<juce::AudioParameterFloat>(    "gain",     "Gain",     gain_range,     0.0f,   "GAIN",
+        juce::AudioProcessorParameter::Category::genericParameter,
+        [](float value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+.1f", value) : "0.0"; } ) );
+
+    params.add( std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK",
+        [](int value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+d", value) : "0"; } ) );
+
+    params.add( std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    1,      999,    214,    "DELAY" ) );
+
+    params.add( std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping-Pong",0,      100,    50,     "PING-PONG" ) );
+    params.add( std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ) );
+
+    params.add( std::make_unique<juce::AudioParameterInt>(      "dry",      "Dry",      0,      100,    100,    "DRY" ) );
+    params.add( std::make_unique<juce::AudioParameterInt>(      "wet",      "Wet",      0,      100,    50,     "WET" ) );
+
+    return params;
+}
+
 //==============================================================================
 DrEchoAudioProcessor::DrEchoAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -23,18 +47,7 @@ DrEchoAudioProcessor::DrEchoAudioProcessor()
                      #endif
                        )
 #endif
-    , apvts(*this, nullptr, "PARAMETERS", {
-        std::make_unique<juce::AudioParameterInt>(      "level",    "Level",    0,      200,    100,    "LEVEL" ),
-        std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK", [](int value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+d", value) : "0"; } ),
-
-        std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    1,      999,    214,    "DELAY" ),
-
-        std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping Pong",0,      100,    50,     "PING PONG" ),
-        std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ),
-
-        std::make_unique<juce::AudioParameterInt>(      "dry",      "Dry",      0,      100,    100,    "DRY" ),
-        std::make_unique<juce::AudioParameterInt>(      "wet",      "Wet",      0,      100,    50,     "WET" ),
-    })
+    , apvts(*this, nullptr, "PARAMETERS", _create_parameter_layout())
 {
 }
 
@@ -162,7 +175,7 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     jassert( totalNumInputChannels == totalNumOutputChannels );
     jassert( totalNumInputChannels == 2 );
 
-    const float level = apvts.getRawParameterValue("level")->load() * 0.01f; // integer percentage to float
+    const float gain = juce::Decibels::decibelsToGain( apvts.getRawParameterValue("gain")->load() ); // float dB to float gain
     const float bank = apvts.getRawParameterValue("bank")->load() / 45.0f; // integer [-45; +45] to float [-1; +1]
 
     const float delay = apvts.getRawParameterValue("delay")->load() * 0.001f; // integer milliseconds to float seconds
@@ -225,7 +238,7 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         for ( int channel = 0; channel < totalNumInputChannels; ++channel )
         {
             SampleInfo& si = channel_sample_info[ channel ];
-            si.input_sample *= level;
+            si.input_sample *= gain;
             si.wet_sample = _sample_buffers[ channel ][ delayed_index ];
             buffer.getWritePointer( channel )[ block_index ] = dry * si.dry_sample + wet * si.wet_sample;
         } // for channel
