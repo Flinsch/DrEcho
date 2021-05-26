@@ -15,7 +15,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout _create_parameter_layout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout params;
 
-    juce::NormalisableRange<float> gain_range( -12.0f, +12.0f, 0.1f );
+    const float abs_gain_db = 24.0f;
+    const juce::NormalisableRange<float> gain_range( -abs_gain_db, +abs_gain_db, 0.1f );
 
     params.add( std::make_unique<juce::AudioParameterFloat>(    "gain",     "Gain",     gain_range,     0.0f,   "GAIN",
         juce::AudioProcessorParameter::Category::genericParameter,
@@ -175,16 +176,16 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     jassert( totalNumInputChannels == totalNumOutputChannels );
     jassert( totalNumInputChannels == 2 );
 
-    const float gain = juce::Decibels::decibelsToGain( apvts.getRawParameterValue("gain")->load() ); // float dB to float gain
-    const float bank = apvts.getRawParameterValue("bank")->load() / 45.0f; // integer [-45; +45] to float [-1; +1]
+    const float gain = juce::Decibels::decibelsToGain( static_cast<float>( *apvts.getRawParameterValue("gain") ) ); // float dB to float gain
+    const float bank = *apvts.getRawParameterValue("bank") / 45.0f; // integer [-45; +45] to float [-1; +1]
 
-    const float delay = apvts.getRawParameterValue("delay")->load() * 0.001f; // integer milliseconds to float seconds
+    const float delay = *apvts.getRawParameterValue("delay") * 0.001f; // integer milliseconds to float seconds
 
-    const float pingpong = apvts.getRawParameterValue("pingpong")->load() * 0.01f; // integer percentage to float
-    const float feedback = apvts.getRawParameterValue("feedback")->load() * 0.01f; // integer percentage to float
+    const float pingpong = *apvts.getRawParameterValue("pingpong") * 0.01f; // integer percentage to float
+    const float feedback = *apvts.getRawParameterValue("feedback") * 0.01f; // integer percentage to float
 
-    const float dry = apvts.getRawParameterValue("dry")->load() * 0.01f; // integer percentage to float
-    const float wet = apvts.getRawParameterValue("wet")->load() * 0.01f; // integer percentage to float
+    const float dry = *apvts.getRawParameterValue("dry") * 0.01f; // integer percentage to float
+    const float wet = *apvts.getRawParameterValue("wet") * 0.01f; // integer percentage to float
 
     const size_t num_delayed_samples = static_cast<size_t>( _sample_rate * delay );
 
@@ -272,12 +273,26 @@ void DrEchoAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    std::unique_ptr<juce::XmlElement> root_element( new juce::XmlElement( "DrEcho" ) );
+    juce::XmlElement* parameters_element = apvts.copyState().createXml().release();
+    root_element->addChildElement( parameters_element );
+    copyXmlToBinary( *root_element, destData );
 }
 
 void DrEchoAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    std::unique_ptr<juce::XmlElement> root_element( getXmlFromBinary( data, sizeInBytes ) );
+    if ( !root_element )
+        return;
+    juce::XmlElement* parameters_element = root_element->getChildByName( apvts.state.getType() );
+    if ( !parameters_element )
+        return;
+    apvts.replaceState( juce::ValueTree::fromXml( *parameters_element ) );
+    
 }
 
 //==============================================================================

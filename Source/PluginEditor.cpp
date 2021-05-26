@@ -200,7 +200,7 @@ juce::Slider& DrEchoAudioProcessorEditor::_add_slider(const juce::String& parame
     slider.setTextBoxStyle( juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, bounds.getWidth(), slider.getTextBoxHeight() );
     slider.setTextValueSuffix( textValueSuffix );
 
-    slider.setPopupMenuEnabled( true );
+    //slider.setPopupMenuEnabled( true );
 
     addAndMakeVisible( slider );
 
