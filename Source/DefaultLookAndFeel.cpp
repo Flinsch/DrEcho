@@ -65,7 +65,9 @@ void DefaultLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int w
     bool twoSided = -slider.getMinimum() == +slider.getMaximum();
 
     int totalCount;
-    if ( twoSided )
+    if ( slider.getName() == "delay" )
+        totalCount = 16, ledWidth *= 1.5f; // This is so dirty and I'm not in the least ashamed!
+    else if ( twoSided )
         totalCount = static_cast<int>( ::fabsf( rotaryTotalAngleDiff ) * arcRadius / (ledWidth * 1.2f) ) / 2 * 2; // Force an even number.
     else
         totalCount = (static_cast<int>( ::fabsf( rotaryTotalAngleDiff ) * arcRadius / (ledWidth * 1.2f) ) - 1) / 2 * 2 + 1; // Force an odd number.

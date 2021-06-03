@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="RnXuyf" name="DrEcho" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              version="1.0.0" pluginFormats="buildStandalone,buildVST3" pluginManufacturer="Stefan Fleischer"
+              version="1.1.0" pluginFormats="buildStandalone,buildVST3" pluginManufacturer="Stefan Fleischer"
               aaxIdentifier="com.Flinsch.DrEcho" pluginVST3Category="Delay"
               pluginVSTCategory="kPlugCategEffect" bundleIdentifier="com.Flinsch.DrEcho"
               pluginName="Dr.Echo" pluginDesc="A simple echo/delay VST plug-in">

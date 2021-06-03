@@ -17,15 +17,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout _create_parameter_layout()
 
     const float abs_gain_db = 24.0f;
     const juce::NormalisableRange<float> gain_range( -abs_gain_db, +abs_gain_db, 0.1f );
+    const juce::NormalisableRange<float> delay_range( 0.05f, 16.0f, 0.05f );
 
     params.add( std::make_unique<juce::AudioParameterFloat>(    "gain",     "Gain",     gain_range,     0.0f,   "GAIN",
         juce::AudioProcessorParameter::Category::genericParameter,
         [](float value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+.1f", value) : "0.0"; } ) );
 
-    params.add( std::make_unique<juce::AudioParameterInt>(      "bank",     "Bank",     -45,    +45,    0,      "BANK",
+    params.add( std::make_unique<juce::AudioParameterInt>(      "pan",      "Pan",      -45,    +45,    0,      "PAN",
         [](int value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+d", value) : "0"; } ) );
 
-    params.add( std::make_unique<juce::AudioParameterInt>(      "delay",    "Delay",    1,      999,    214,    "DELAY" ) );
+    params.add( std::make_unique<juce::AudioParameterFloat>(    "delay",    "Delay",    delay_range,    2.0f,    "DELAY" ) );
 
     params.add( std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping-Pong",0,      100,    50,     "PING-PONG" ) );
     params.add( std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ) );
@@ -176,10 +177,19 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     jassert( totalNumInputChannels == totalNumOutputChannels );
     jassert( totalNumInputChannels == 2 );
 
-    const float gain = juce::Decibels::decibelsToGain( static_cast<float>( *apvts.getRawParameterValue("gain") ) ); // float dB to float gain
-    const float bank = *apvts.getRawParameterValue("bank") / 45.0f; // integer [-45; +45] to float [-1; +1]
+    juce::AudioPlayHead* play_head = getPlayHead();
+    juce::AudioPlayHead::CurrentPositionInfo cpi;
+    if ( play_head )
+        play_head->getCurrentPosition( cpi );
+    else
+        cpi.bpm = 140.0; // Just some arbitrary but halfway meaningful value.
+    const float bpm = static_cast<float>( cpi.bpm );
+    const float bps = bpm * (1.0f/60.0f);
 
-    const float delay = *apvts.getRawParameterValue("delay") * 0.001f; // integer milliseconds to float seconds
+    const float gain = juce::Decibels::decibelsToGain( static_cast<float>( *apvts.getRawParameterValue("gain") ) ); // float dB to float gain
+    const float pan = *apvts.getRawParameterValue("pan") / 45.0f; // integer [-45; +45] to float [-1; +1]
+
+    const float delay = *apvts.getRawParameterValue("delay") * (1.0f/16.0f) * 4.0f / bps; // float 1/64th to float seconds
 
     const float pingpong = *apvts.getRawParameterValue("pingpong") * 0.01f; // integer percentage to float
     const float feedback = *apvts.getRawParameterValue("feedback") * 0.01f; // integer percentage to float
@@ -188,6 +198,9 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     const float wet = *apvts.getRawParameterValue("wet") * 0.01f; // integer percentage to float
 
     const size_t num_delayed_samples = static_cast<size_t>( _sample_rate * delay );
+
+    const float cs0 = ::cosf( 0.25f * juce::float_Pi * (1.0f + pan) );
+    const float cs1 = ::cosf( 0.25f * juce::float_Pi * (1.0f - pan) );
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -228,8 +241,8 @@ void DrEchoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         {
             const float M = 0.5f * (si0.dry_sample + si1.dry_sample);
             const float S = si0.dry_sample - si1.dry_sample;
-            si0.input_sample = ::cosf( 0.25f * juce::float_Pi * (1.0f + bank) ) * M + S;
-            si1.input_sample = ::cosf( 0.25f * juce::float_Pi * (1.0f - bank) ) * M - S;
+            si0.input_sample = cs0 * M + S;
+            si1.input_sample = cs1 * M - S;
         }
         else
         {

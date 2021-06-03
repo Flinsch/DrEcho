@@ -28,9 +28,9 @@ DrEchoAudioProcessorEditor::DrEchoAudioProcessorEditor (DrEchoAudioProcessor& p)
     const int oy = (ch - sh) / 2 + ch / 2;
 
     _add_slider( "gain",        { ox + cw * 0,      oy + ch * 0,      sw, sh }, " dB", true );
-    _add_slider( "bank",        { ox + cw * 0,      oy + ch * 1,      sw, sh }, L" °", true );
+    _add_slider( "pan",         { ox + cw * 0,      oy + ch * 1,      sw, sh }, L" °", true );
 
-    _add_slider( "delay",       { ox + cw * 3/2-20, oy + ch * 0-20,   sw+40, sh+40 }, " ms" );
+    _add_slider( "delay",       { ox + cw * 3/2-20, oy + ch * 0-20,   sw+40, sh+40 }, " / 16th" );
 
     _add_slider( "pingpong",    { ox + cw * 1,      oy + ch * 1,      sw, sh }, " %" );
     _add_slider( "feedback",    { ox + cw * 2,      oy + ch * 1,      sw, sh }, " %" );
@@ -180,8 +180,10 @@ juce::Label& DrEchoAudioProcessorEditor::_add_label(const juce::String& text, co
 
 juce::Slider& DrEchoAudioProcessorEditor::_add_slider(const juce::String& parameterID, const juce::Rectangle<int>& bounds, const juce::String& textValueSuffix, bool meta)
 {
+    const juce::String name = parameterID;
+
     ComponentInfo& ci = _component_infos.emplace( parameterID, ComponentInfo{
-        std::make_unique<juce::Slider>(),
+        std::make_unique<juce::Slider>( name ),
         bounds,
         nullptr,
     } ).first->second;
