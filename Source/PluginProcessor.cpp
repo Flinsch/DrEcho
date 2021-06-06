@@ -26,7 +26,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout _create_parameter_layout()
     params.add( std::make_unique<juce::AudioParameterInt>(      "pan",      "Pan",      -45,    +45,    0,      "PAN",
         [](int value, int maximumStringLength) -> juce::String { return value ? juce::String::formatted("%+d", value) : "0"; } ) );
 
-    params.add( std::make_unique<juce::AudioParameterFloat>(    "delay",    "Delay",    delay_range,    2.0f,    "DELAY" ) );
+    params.add( std::make_unique<juce::AudioParameterFloat>(    "delay",    "Delay",    delay_range,    2.0f,   "TIME" ) );
 
     params.add( std::make_unique<juce::AudioParameterInt>(      "pingpong", "Ping-Pong",0,      100,    50,     "PING-PONG" ) );
     params.add( std::make_unique<juce::AudioParameterInt>(      "feedback", "Feedback", 0,      100,    0,      "FEEDBACK" ) );
