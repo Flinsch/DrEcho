@@ -74,20 +74,20 @@ void DrEchoAudioProcessorEditor::paint (juce::Graphics& g)
 
     const int cw = W / 4;
 
-    g.setFillType( juce::FillType( juce::Colour( 0xff0b2430 ) ) );
+    g.setFillType( juce::FillType( juce::Colour( 0xff131b30 ) ) );
     g.fillRect( 0 * cw, 0, 1 * cw, H );
     g.setFillType( juce::FillType( juce::Colour( 0xffefefef ) ) );
     g.fillRect( 1 * cw, 0, 2 * cw, H );
-    g.setFillType( juce::FillType( juce::Colour( 0xff0b2430 ) ) );
+    g.setFillType( juce::FillType( juce::Colour( 0xff131b30 ) ) );
     g.fillRect( 3 * cw, 0, 3 * cw, H );
 
     g.setFont( juce::Font( "Arial", 24.0f, juce::Font::bold ) );
     g.setColour( juce::Colour( 0x7fffffff ) );
-    g.drawFittedText( "INPUT MIX", 4, 4, cw - 8, 28, juce::Justification::centredTop, 1 );
+    g.drawFittedText( "INPUT MIX", 8, 4, cw - 16, 28, juce::Justification::centredTop, 1 );
     g.setColour( juce::Colour( 0x7f000000 ) );
-    g.drawFittedText( "DELAY / ECHO", cw + 4, 4, cw * 2 - 8, 28, juce::Justification::centredTop, 1 );
+    g.drawFittedText( "DELAY / ECHO", cw + 8, 4, cw * 2 - 16, 28, juce::Justification::centredTop, 1 );
     g.setColour( juce::Colour( 0x7fffffff ) );
-    g.drawFittedText( "OUTPUT MIX", cw * 3 + 4, 4, cw - 8, 28, juce::Justification::centredTop, 1 );
+    g.drawFittedText( "OUTPUT MIX", cw * 3 + 8, 4, cw - 16, 28, juce::Justification::centredTop, 1 );
 
     const juce::Font logo_font = juce::Font( "Arial", 32.0f, juce::Font::bold );
     const juce::Font italic_font = juce::Font( "Arial", 14.0f, juce::Font::italic );
