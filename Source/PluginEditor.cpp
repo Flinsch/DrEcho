@@ -28,7 +28,7 @@ DrEchoAudioProcessorEditor::DrEchoAudioProcessorEditor (DrEchoAudioProcessor& p)
     const int oy = (ch - sh) / 2 + ch / 2;
 
     _add_slider( "gain",        { ox + cw * 0,      oy + ch * 0,      sw, sh }, " dB", true );
-    _add_slider( "pan",         { ox + cw * 0,      oy + ch * 1,      sw, sh }, L" °", true );
+    _add_slider( "pan",         { ox + cw * 0,      oy + ch * 1,      sw, sh }, L" \u00b0", true );
 
     _add_slider( "delay",       { ox + cw * 3/2-20, oy + ch * 0-20,   sw+40, sh+40 }, " / 16th" );
 
